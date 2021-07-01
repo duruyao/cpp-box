@@ -1,3 +1,14 @@
+# commitizen
+node_modules/
+package.json
+package-lock.json
+
+# IDEA
+*.idea/
+
+# Build
+*build*/
+
 # Prerequisites
 *.d
 
