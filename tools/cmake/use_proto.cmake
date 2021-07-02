@@ -39,7 +39,7 @@ if (NOT DEFINED USE_PROTO_CMAKE)
 
         add_custom_target(proto_2_cxx DEPENDS proto_gen_files)
     else ()
-        message(ERROR " : include 'use_proto.cmake' without defining 'proto_in_dir' or 'proto_out_dir'")
+        message(ERROR ": include 'use_proto.cmake' without defining 'proto_in_dir' or 'proto_out_dir'")
     endif ()
 
     list(APPEND third_party_libs protobuf)
