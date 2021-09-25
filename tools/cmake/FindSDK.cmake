@@ -1,0 +1,12 @@
+if (NOT SDK_FOUND)
+    if (WIN32)
+        find_path(SDK_HOME NAMES libzmq/ cppzmq/ protobuf/ grpc/ PATHS D:\\cpp-box-sdk REQUIRED NO_DEFAULT_PATH)
+    elseif (UNIX AND NOT APPLE)
+        find_path(SDK_HOME NAMES libzmq/ cppzmq/ protobuf/ grpc/ PATHS /opt/cpp-box-sdk REQUIRED NO_DEFAULT_PATH)
+    elseif (APPLE)
+        find_path(SDK_HOME NAMES libzmq/ cppzmq/ protobuf/ grpc/ PATHS /opt/cpp-box-sdk REQUIRED NO_DEFAULT_PATH)
+    endif ()
+
+    include(FindPackageHandleStandardArgs)
+    find_package_handle_standard_args(SDK FOUND_VAR SDK_FOUND REQUIRED_VARS SDK_HOME)
+endif ()

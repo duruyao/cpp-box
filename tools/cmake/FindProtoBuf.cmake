@@ -1,0 +1,11 @@
+if (NOT ProtoBuf_FOUND)
+    if (ProtoBuf_HOME AND EXISTS ${ProtoBuf_HOME})
+        find_program(ProtoBuf_EXECUTABLE NAMES protoc PATHS ${ProtoBuf_HOME}/bin REQUIRED NO_DEFAULT_PATH)
+    elseif (SDK_FOUND AND EXISTS ${SDK_HOME})
+        find_path(ProtoBuf_HOME NAMES bin/protoc PATHS ${SDK_HOME}/protobuf REQUIRED NO_DEFAULT_PATH)
+        find_program(ProtoBuf_EXECUTABLE NAMES protoc PATHS ${ProtoBuf_HOME}/bin REQUIRED NO_DEFAULT_PATH)
+    endif ()
+
+    include(FindPackageHandleStandardArgs)
+    find_package_handle_standard_args(ProtoBuf FOUND_VAR ProtoBuf_FOUND REQUIRED_VARS ProtoBuf_HOME ProtoBuf_EXECUTABLE)
+endif ()

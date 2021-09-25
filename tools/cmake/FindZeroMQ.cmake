@@ -1,0 +1,13 @@
+if (NOT ZeroMQ_FOUND)
+    if (ZeroMQ_HOME AND EXISTS ${ZeroMQ_HOME})
+        find_path(ZeroMQ_INCLUDE_DIRS NAMES zmq.h PATHS ${ZeroMQ_HOME}/include REQUIRED NO_DEFAULT_PATH)
+        find_library(ZeroMQ_LIBRARIES NAMES zmq PATHS ${ZeroMQ_HOME}/lib REQUIRED NO_DEFAULT_PATH)
+    elseif (SDK_FOUND AND EXISTS ${SDK_HOME})
+        find_path(ZeroMQ_HOME NAMES include/zmq.h PATHS ${SDK_HOME}/libzmq REQUIRED NO_DEFAULT_PATH)
+        find_path(ZeroMQ_INCLUDE_DIRS NAMES zmq.h PATHS ${ZeroMQ_HOME}/include REQUIRED NO_DEFAULT_PATH)
+        find_library(ZeroMQ_LIBRARIES NAMES zmq PATHS ${ZeroMQ_HOME}/lib REQUIRED NO_DEFAULT_PATH)
+    endif ()
+
+    include(FindPackageHandleStandardArgs)
+    find_package_handle_standard_args(ZeroMQ FOUND_VAR ZeroMQ_FOUND REQUIRED_VARS ZeroMQ_HOME ZeroMQ_INCLUDE_DIRS ZeroMQ_LIBRARIES)
+endif ()
