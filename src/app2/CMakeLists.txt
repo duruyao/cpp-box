@@ -1,23 +1,25 @@
+find_package(cJSON REQUIRED)
+find_package(ZeroMQ REQUIRED)
+find_package(CppZeroMQ REQUIRED)
 
-#include(${PROJECT_SOURCE_DIR}/src/cfg_mgr)
-#include(${PROJECT_SOURCE_DIR}/src/log_mgr)
+get_filename_component(app ${CMAKE_CURRENT_SOURCE_DIR} NAME)
+string(REPLACE " " "-" app ${app})
+string(REPLACE "_" "-" app ${app})
+string(REPLACE "--" "-" app ${app})
 
-## use cjson
-include(${PROJECT_SOURCE_DIR}/tools/cmake/use_cjson.cmake)
+aux_source_directory(${cJSON_SOURCE_DIRS} sources)
+aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR} sources)
+aux_source_directory(${PROJECT_SOURCE_DIR}/src/module1 sources)
+aux_source_directory(${PROJECT_SOURCE_DIR}/src/module2 sources)
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-include_directories(${PROJECT_SOURCE_DIR}/src/cfg_mgr)
-include_directories(${PROJECT_SOURCE_DIR}/src/log_mgr)
+add_executable(${app} ${sources})
 
-aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR} source_files)
-aux_source_directory(${PROJECT_SOURCE_DIR}/src/cfg_mgr source_files)
-aux_source_directory(${PROJECT_SOURCE_DIR}/src/log_mgr source_files)
+include_directories(
+        ${cJSON_INCLUDE_DIRS}
+        ${ZeroMQ_INCLUDE_DIRS}
+        ${CppZeroMQ_INCLUDE_DIRS}
+        ${CMAKE_CURRENT_SOURCE_DIR}
+        ${PROJECT_SOURCE_DIR}/src/module1
+        ${PROJECT_SOURCE_DIR}/src/module2)
 
-get_filename_component(app_name ${CMAKE_CURRENT_SOURCE_DIR} NAME)
-string(REPLACE " " "-" app_name ${app_name})
-string(REPLACE "_" "-" app_name ${app_name})
-string(REPLACE "--" "-" app_name ${app_name})
-
-add_executable(${app_name} ${source_files})
-
-target_link_libraries(${app_name} ${third_party_libs})
+target_link_libraries(${app} ${ZeroMQ_LIBRARIES})
