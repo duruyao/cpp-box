@@ -1,33 +1,71 @@
 #! /bin/bash
 
-## date:    2021.05.17
-## file:    compile and install zlib
-## author:  duruyao@hikvision.com
-## release: https://www.zlib.net/
+## date:    2021-05-17
+## author:  duruyao@gmail.com
+## desc:    download, build and install zlib
+## release: https://www.zlib.net
 
-if [ $# != 2 ]; then
-  printf "USAGE (sudo permission may be needed):\n"
-  printf "    %s <ZIP_PATH> <INSTALL_PATH>\n" "${0}"
+set -euo pipefail
+
+function error_ln() {
+  printf "\033[1;32;31m%s\n\033[m" "$1"
+}
+
+function warning_ln() {
+  printf "\033[1;33m%s\n\033[m" "$1"
+}
+
+function info_ln() {
+  printf "\033[0;32;32m%s\n\033[m" "$1"
+}
+
+function show_usage() {
+  cat <<EOF
+Usage: bash $0 <INSTALL_PATH>
+
+Download, build and install ${package} (sudo permission maybe required)
+EOF
+}
+
+function show_usage() {
+  cat <<EOF
+Usage: bash $0 <INSTALL_PATH>
+
+Download, build and install ${package} (sudo permission maybe required)
+EOF
+}
+
+cores="$(($(nproc) / 2))"
+package="zlib"
+url="https://www.zlib.net/zlib-1.2.12.tar.gz"
+
+if [ ${#} != 1 ]; then
+  show_usage >&2
   exit 1
 fi
 
-zip_path="${1}"
-ins_path="${2}"
-new_folder="$(dirname "${zip_path}")/zlib_source"
+install_path="$1"
+mkdir -p "${install_path}"
 
-mkdir -p "${new_folder}" && rm -rf "${new_folder:?}/"*
-unzip -q "${zip_path}" -d "${new_folder}"
+download_path="/tmp/${package}-$(date | md5sum | head -c 6)"
+mkdir -p "${download_path}"
 
-src_path="${new_folder}/$(ls "${new_folder}")"
+cd "${download_path}"
+info_ln "Downloading ${package} from ${url} to ${download_path}"
+curl -LSso "${package}".tar.gz "${url}"
+tar -zxvf "${package}".tar.gz 1>/dev/null
 
-mkdir -p "${ins_path}" && rm -rf "${ins_path:?}/"*
-cd "${src_path}" || exit
+# shellcheck disable=SC2035
+source_path="${PWD}/$(ls -d */)"
 
-./configure --prefix="${ins_path}"
+cd "${source_path}"
+./configure --prefix="${install_path}"
+make all --jobs="${cores}" && make install
 
-make -j16 && make install
-
-printf "\n"
-printf "Install zlib to \`${ins_path}\`:\n"
-ls -all "${ins_path}"
-printf "\n"
+echo ""
+info_ln "Install ${package} to ${install_path}"
+if [ -n "$(command -v tree)" ]; then
+  tree "${install_path}" -L 1
+else
+  ls -all "${install_path}"
+fi
