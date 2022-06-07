@@ -1,119 +1,77 @@
 #! /bin/bash
 
-## date:    2021.05.14
-## file:    compile and install protobuf
-## author:  duruyao@hikvision.com
+## date:    2021-05-17
+## author:  duruyao@gmail.com
+## desc:    download, build and install protobuf
 ## release: https://github.com/protocolbuffers/protobuf/releases
 
-CONSOLE_COLOR_NONE="\033[m"
-CONSOLE_COLOR_RED="\033[1;32;31m"
-CONSOLE_COLOR_GREEN="\033[0;32;32m"
-CONSOLE_COLOR_YELLOW="\033[0;33m"
-CONSOLE_COLOR_MAGENTA="\033[1;35m"
-CONSOLE_COLOR_CYAN_BLUE="\033[1;36m"
-CONSOLE_COLOR_LIGHT_BLUE="\033[1;32;34m"
+## more info see this:
+##     https://developers.google.com/protocol-buffers
+## compile guide see this:
+##     https://github.com/protocolbuffers/protobuf/blob/master/src/README.md
 
-function prt_re() {
-  printf "${CONSOLE_COLOR_RED}"
-  printf "${@}"
-  printf "${CONSOLE_COLOR_NONE}"
+set -euo pipefail
+
+function error_ln() {
+  printf "\033[1;32;31m%s\n\033[m" "$1"
 }
 
-function prt_ye() {
-  printf "${CONSOLE_COLOR_YELLOW}"
-  printf "${@}"
-  printf "${CONSOLE_COLOR_NONE}"
+function warning_ln() {
+  printf "\033[1;33m%s\n\033[m" "$1"
 }
 
-function prt_gr() {
-  printf "${CONSOLE_COLOR_GREEN}"
-  printf "${@}"
-  printf "${CONSOLE_COLOR_NONE}"
+function info_ln() {
+  printf "\033[0;32;32m%s\n\033[m" "$1"
 }
 
-function prt_bl() {
-  printf "${CONSOLE_COLOR_LIGHT_BLUE}"
-  printf "${@}"
-  printf "${CONSOLE_COLOR_NONE}"
+function show_usage() {
+  cat <<EOF
+Usage: bash $0 <INSTALL_PATH>
+
+Download, build and install ${package} (sudo permission maybe required)
+EOF
 }
 
-## pre-check
+function show_usage() {
+  cat <<EOF
+Usage: bash $0 <INSTALL_PATH>
 
-if [ $# == 2 ]; then
-  protobuf_zip_path="${1}"
-  protobuf_ins_path="${2}"
-else
-  prt_ye "USAGE (sudo permission may be needed):\n"
-  printf "    %s <PROTO_ZIP_PATH> <PROTO_INSTALL_PATH>\n" "${0}"
+Download, build and install ${package} (sudo permission maybe required)
+EOF
+}
+
+cores="$(($(nproc) / 2))"
+package="protobuf"
+url="https://github.com/protocolbuffers/protobuf/releases/download/v21.1/protobuf-cpp-3.21.1.tar.gz"
+
+if [ ${#} != 1 ]; then
+  show_usage >&2
   exit 1
 fi
 
-printf "\n"
-prt_gr "Compile and Install Protocol Buffers in Linux\n\n"
+install_path="$1"
+mkdir -p "${install_path}"
 
-printf "More info see this:\n"
-prt_bl "    https://developers.google.com/protocol-buffers\n"
-printf "Other releases see this:\n"
-prt_bl "    https://github.com/protocolbuffers/protobuf/releases\n"
-printf "Compile guide see this:\n"
-prt_bl "    https://github.com/protocolbuffers/protobuf/blob/master/src/README.md\n\n"
+download_path="/tmp/${package}-$(date | md5sum | head -c 6)"
+mkdir -p "${download_path}"
 
-## 1st step
+cd "${download_path}"
+info_ln "Downloading ${package} from ${url} to ${download_path}"
+curl -LSso "${package}".tar.gz "${url}"
+tar -zxvf "${package}".tar.gz 1>/dev/null
 
-prt_ye "1)\n"
-printf "To build protobuf from source, the following tools are needed:\n"
+# shellcheck disable=SC2035
+source_path="${PWD}/$(ls -d */)"
 
-req_app_list=("g++" "make" "unzip" "autoconf" "automake" "libtool")
+cd "${source_path}"
+./configure --prefix="${install_path}"
+make all --jobs="${cores}"
+make check && make install # more available memory maybe required
 
-for req_app in "${req_app_list[@]}"; do
-  prt_ye "    %-16s" "${req_app}"
-  printf ":	 "
-
-  req_app_path="$(command -v "${req_app}")"
-  if [ -z "${req_app_path}" ]; then
-    prt_re "NOT FOUND\n"
-  else
-    printf "\`${req_app_path}\`\n"
-  fi
-done
-
-printf "On Ubuntu/Debian, you can install them with:\n"
-printf "    sudo apt-get install %s\n\n" "${req_app_list[*]}"
-
-## 2nd step
-
-prt_ye "2)\n"
-printf "Unzip \`${protobuf_zip_path}\` ...\n"
-
-new_folder="$(dirname "${protobuf_zip_path}")/protobuf_source"
-
-mkdir -p "${new_folder}" && rm -rf "${new_folder:?}/"*
-unzip -q "${protobuf_zip_path}" -d "${new_folder}"
-
-protobuf_src_path="${new_folder}/$(ls "${new_folder}")"
-
-printf "Generate source code to \`${protobuf_src_path}\`:\n"
-ls "${protobuf_src_path}"
-
-printf "\n"
-
-## 3rd step
-
-prt_ye "3)\n"
-printf "Compile protobuf ...\n"
-
-mkdir -p "${protobuf_ins_path}" && rm -rf "${protobuf_ins_path:?}/"*
-cd "${protobuf_src_path}" || exit
-
-## auto configure
-./configure --prefix="${protobuf_ins_path}"
-
-make -j16 && make check
-make install ## copy `lib`, `bin`, `include` to destination (sudo permission needed).
-
-printf "\n"
-printf "Install protobuf "
-prt_ye "($("${protobuf_ins_path}"/bin/protoc --version)) "
-printf "to \`${protobuf_ins_path}\`:\n"
-ls -all "${protobuf_ins_path}"
-printf "\n"
+echo ""
+info_ln "Install ${package} to ${install_path}"
+if [ -n "$(command -v tree)" ]; then
+  tree "${install_path}" -L 1
+else
+  ls -all "${install_path}"
+fi
