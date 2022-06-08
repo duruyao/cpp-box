@@ -47,12 +47,14 @@ fi
 install_path="$1"
 mkdir -p "${install_path}"
 
-download_path="/tmp/${package}-$(date | md5sum | head -c 6)"
+download_path="${HOME}/Downloads/${package}"
 mkdir -p "${download_path}"
 
 cd "${download_path}"
 info_ln "Downloading ${package} from ${url} to ${download_path}"
-curl -LSso "${package}".tar.gz "${url}"
+if [ ! -f "${package}".tar.gz ]; then
+  curl -LSso "${package}".tar.gz "${url}"
+fi
 tar -zxvf "${package}".tar.gz 1>/dev/null
 
 # shellcheck disable=SC2035
@@ -60,7 +62,8 @@ source_path="${PWD}/$(ls -d */)"
 
 cd "${source_path}"
 ./bootstrap --prefix="${install_path}"
-make all --jobs="${cores}" && make install
+make all --jobs="${cores}"
+make install
 
 echo ""
 info_ln "Install ${package} to ${install_path}"

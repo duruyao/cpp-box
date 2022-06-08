@@ -49,15 +49,20 @@ if [ ${#} != 1 ]; then
   exit 1
 fi
 
+## Prerequisites
+#apt-get install autoconf automake libtool curl make g++ unzip -y
+
 install_path="$1"
 mkdir -p "${install_path}"
 
-download_path="/tmp/${package}-$(date | md5sum | head -c 6)"
+download_path="${HOME}/Downloads/${package}"
 mkdir -p "${download_path}"
 
 cd "${download_path}"
-info_ln "Downloading ${package} from ${url} to ${download_path}"
-curl -LSso "${package}".tar.gz "${url}"
+info_ln "Downloading ${package} from ${url} to ${download_path}/${package}.tar.gz"
+if [ ! -f "${package}".tar.gz ]; then
+  curl -LSso "${package}".tar.gz "${url}"
+fi
 tar -zxvf "${package}".tar.gz 1>/dev/null
 
 # shellcheck disable=SC2035
@@ -66,7 +71,8 @@ source_path="${PWD}/$(ls -d */)"
 cd "${source_path}"
 ./configure --prefix="${install_path}"
 make all --jobs="${cores}"
-make check && make install # more available memory maybe required
+make check
+make install
 
 echo ""
 info_ln "Install ${package} to ${install_path}"

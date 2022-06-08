@@ -40,12 +40,14 @@ install_path="$1"
 libzmq_install_path="$2"
 mkdir -p "${install_path}"
 
-download_path="/tmp/${package}-$(date | md5sum | head -c 6)"
+download_path="${HOME}/Downloads/${package}"
 mkdir -p "${download_path}"
 
 cd "${download_path}"
 info_ln "Downloading ${package} from ${url} to ${download_path}"
-curl -LSso "${package}".tar.gz "${url}"
+if [ ! -f "${package}".tar.gz ]; then
+  curl -LSso "${package}".tar.gz "${url}"
+fi
 tar -zxvf "${package}".tar.gz 1>/dev/null
 
 # shellcheck disable=SC2035
@@ -61,7 +63,6 @@ cmake -S"${source_path}" -B"${build_path}" \
   -DCMAKE_BUILD_WITH_INSTALL_RPATH=OFF \
   -DCMAKE_INSTALL_RPATH="${install_path}/lib" \
   -DCMAKE_INSTALL_RPATH_USE_LINK_PATH=ON
-
 cmake --build "${build_path}" --target all --jobs="${cores}"
 cmake --build "${build_path}" --target install
 
