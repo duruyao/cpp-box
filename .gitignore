@@ -5,6 +5,10 @@ package-lock.json
 
 # Temporary files
 *.swp
+*.bak
+*.tmp
+*bak/
+*tmp/
 
 # IDEA
 *.idea/
