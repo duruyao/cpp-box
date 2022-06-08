@@ -1,16 +1,17 @@
-# commitizen
+# Commitizen
 node_modules/
-package.json
 package-lock.json
 
 # Temporary files
 *.swp
 *.bak
 *.tmp
+*.old
 *bak/
 *tmp/
+*old/
 
-# IDEA
+# Cache files for JetBrains IDE
 *.idea/
 
 # Build
