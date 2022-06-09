@@ -55,7 +55,7 @@ source_path="${PWD}/$(ls -d */)"
 build_path="${source_path}/build"
 mkdir -p "${build_path}" && rm -rf "${build_path:?}/"*
 
-cmake -S"${source_path}" -B"${build_path}" \
+cmake -H"${source_path}" -B"${build_path}" \
   -DCPPZMQ_BUILD_TESTS=OFF \
   -DCMAKE_INSTALL_PREFIX="${install_path}" \
   -DCMAKE_PREFIX_PATH="${libzmq_install_path}" \

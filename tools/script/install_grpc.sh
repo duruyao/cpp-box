@@ -69,7 +69,7 @@ git submodule update --init
 # Install absl
 source_path="${PWD}/third_party/abseil-cpp"
 build_path="${source_path}/cmake/build"
-cmake -S"${source_path}" -B"${build_path}" \
+cmake -H"${source_path}" -B"${build_path}" \
   -DCMAKE_CXX_FLAGS="-std=c++11" \
   -DCMAKE_BUILD_TYPE=Release \
   -DBUILD_SHARED_LIBS=ON \
@@ -88,7 +88,7 @@ cmake --build "${build_path}" --target install
 # apt-get install -y libc-ares-dev
 source_path="${PWD}/third_party/cares/cares"
 build_path="${source_path}/cmake/build"
-cmake -S"${source_path}" -B"${build_path}" \
+cmake -H"${source_path}" -B"${build_path}" \
   -DCMAKE_CXX_FLAGS="-std=c++11" \
   -DCMAKE_BUILD_TYPE=Release \
   -DBUILD_SHARED_LIBS=ON \
@@ -104,7 +104,7 @@ cmake --build "${build_path}" --target install
 if [ -z "$(command -v protoc)" ]; then
   source_path="${PWD}/third_party/protobuf"
   build_path="${source_path}/cmake/build"
-  cmake -S"${source_path}" -B"${build_path}" \
+  cmake -H"${source_path}" -B"${build_path}" \
     -DCMAKE_CXX_FLAGS="-std=c++11" \
     -DCMAKE_BUILD_TYPE=Release \
     -DBUILD_SHARED_LIBS=ON \
@@ -121,7 +121,7 @@ fi
 # Install re2
 source_path="${PWD}/third_party/re2"
 build_path="${source_path}/cmake/build"
-cmake -S"${source_path}" -B"${build_path}" \
+cmake -H"${source_path}" -B"${build_path}" \
   -DCMAKE_CXX_FLAGS="-std=c++11" \
   -DCMAKE_BUILD_TYPE=Release \
   -DBUILD_SHARED_LIBS=ON \
@@ -137,7 +137,7 @@ cmake --build "${build_path}" --target install
 # Install zlib
 source_path="${PWD}/third_party/zlib"
 build_path="${source_path}/cmake/build"
-cmake -S"${source_path}" -B"${build_path}" \
+cmake -H"${source_path}" -B"${build_path}" \
   -DCMAKE_CXX_FLAGS="-std=c++11" \
   -DCMAKE_BUILD_TYPE=Release \
   -DBUILD_SHARED_LIBS=ON \
@@ -152,7 +152,7 @@ cmake --build "${build_path}" --target install
 # Install grpc
 source_path="${PWD}"
 build_path="${source_path}/cmake/build"
-cmake -S"${source_path}" -B"${build_path}" \
+cmake -H"${source_path}" -B"${build_path}" \
   -DgRPC_INSTALL=ON \
   -DBUILD_SHARED_LIBS=ON \
   -DgRPC_BUILD_TESTS=OFF \
