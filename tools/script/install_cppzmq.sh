@@ -53,7 +53,6 @@ tar -zxvf "${package}".tar.gz 1>/dev/null
 # shellcheck disable=SC2035
 source_path="${PWD}/$(ls -d */)"
 build_path="${source_path}/build"
-mkdir -p "${build_path}" && rm -rf "${build_path:?}/"*
 
 cmake -H"${source_path}" -B"${build_path}" \
   -DCPPZMQ_BUILD_TESTS=OFF \
