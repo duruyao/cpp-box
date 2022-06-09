@@ -66,13 +66,21 @@ fi
 tar -zxvf "${package}".tar.gz 1>/dev/null
 
 # shellcheck disable=SC2035
-source_path="${PWD}/$(ls -d */)"
+source_path="${PWD}/$(ls -d */)/cmake"
+build_path="${source_path}/build"
 
-cd "${source_path}"
-./configure --prefix="${install_path}"
-make all --jobs="${cores}"
-make check
-make install
+cmake -H"${source_path}" -B"${build_path}" \
+  -DCMAKE_CXX_FLAGS="-std=c++11" \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DBUILD_SHARED_LIBS=ON \
+  -DCMAKE_INSTALL_PREFIX="${install_path}" \
+  -DCMAKE_SKIP_BUILD_RPATH=OFF \
+  -DCMAKE_BUILD_WITH_INSTALL_RPATH=OFF \
+  -DCMAKE_INSTALL_RPATH="${install_path}/lib" \
+  -DCMAKE_INSTALL_RPATH_USE_LINK_PATH=ON \
+  -Dprotobuf_BUILD_TESTS=OFF
+cmake --build "${build_path}" --target all --jobs="${cores}"
+cmake --build "${build_path}" --target install
 
 echo ""
 info_ln "Install ${package} to ${install_path}"
