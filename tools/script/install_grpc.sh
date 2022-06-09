@@ -102,8 +102,8 @@ cmake --build "${build_path}" --target install
 
 # Install protobuf
 if [ -z "$(command -v protoc)" ]; then
-  source_path="${PWD}/third_party/protobuf"
-  build_path="${source_path}/cmake/build"
+  source_path="${PWD}/third_party/protobuf/cmake"
+  build_path="${source_path}/build"
   cmake -H"${source_path}" -B"${build_path}" \
     -DCMAKE_CXX_FLAGS="-std=c++11" \
     -DCMAKE_BUILD_TYPE=Release \
@@ -178,5 +178,3 @@ if [ -n "$(command -v tree)" ]; then
 else
   ls -all "${install_path}"
 fi
-
-# TODO: test
