@@ -42,7 +42,7 @@ EOF
 
 cores="$(($(nproc) / 2))"
 package="protobuf"
-url="https://github.com/protocolbuffers/protobuf/releases/download/v21.1/protobuf-cpp-3.21.1.tar.gz"
+url="https://github.com/protocolbuffers/protobuf/releases/download/v21.1/protobuf-all-21.1.tar.gz"
 
 if [ ${#} != 1 ]; then
   show_usage >&2
