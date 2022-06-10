@@ -36,7 +36,7 @@ EOF
 }
 
 cores="$(($(nproc) / 2))"
-package="cmake"
+package="libzmq"
 url="https://github.com/zeromq/libzmq/releases/download/v4.3.4/zeromq-4.3.4.tar.gz"
 
 if [ ${#} != 1 ]; then
