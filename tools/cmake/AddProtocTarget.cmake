@@ -1,23 +1,28 @@
 ## date:   2022-06-13
 ## author: duruyao@gmail.com
-## desc:   add a target to compile protobuf sources to some specif language sources
+## desc:   add a target to compile protobuf sources to some specific language sources
 
 # add_protoc_target(<name> <protobuf-executable>
-#         [SOURCE_DIR <source-directory>]
-#         [DESTINATION_DIR <destination-directory>]
-#         [OUTPUT_TYPES {cpp|csharp|dart|go|java|kotlin|objc|php|pyi|python|ruby}...]
+#         SOURCE_DIR <source-directory>
+#         DESTINATION_DIR <destination-directory>
+#         OUTPUT_TYPES {cpp|csharp|dart|go|java|kotlin|objc|php|pyi|python|ruby}...
 #         )
 function(ADD_PROTOC_TARGET TARGET EXECUTABLE)
-    set(prefix ARG)
+    set(prefix ADD_PROTOC_TARGET)
     set(options)
     set(oneValueKeywords SOURCE_DIR DESTINATION_DIR)
     set(multiValueKeywords OUTPUT_TYPES)
     set(valid_output_types cpp csharp dart go java kotlin objc php pyi python ruby)
 
     cmake_parse_arguments(PARSE_ARGV 2 "${prefix}" "${options}" "${oneValueKeywords}" "${multiValueKeywords}")
+    message(DEBUG "${prefix}_TARGET: ${TARGET}")
+    message(DEBUG "${prefix}_EXECUTABLE: ${EXECUTABLE}")
+    message(DEBUG "${prefix}_SOURCE_DIR: ${${prefix}_SOURCE_DIR}")
+    message(DEBUG "${prefix}_DESTINATION_DIR: ${${prefix}_DESTINATION_DIR}")
+    message(DEBUG "${prefix}_OUTPUT_TYPES: ${${prefix}_OUTPUT_TYPES}")
 
-    if (NOT EXISTS ${EXECUTABLE})
-        message(FATAL_ERROR "No such file: ${EXECUTABLE}")
+    if (${ARGC} LESS 8)
+        message(FATAL_ERROR "add_protoc_target called with incorrect number of arguments")
     endif ()
     if (NOT EXISTS ${${prefix}_SOURCE_DIR})
         message(FATAL_ERROR "No such directory: ${${prefix}_SOURCE_DIR}")
@@ -31,11 +36,14 @@ function(ADD_PROTOC_TARGET TARGET EXECUTABLE)
             message(FATAL_ERROR "Unknown output type: ${type}")
         endif ()
 
-        add_custom_command(OUTPUT protoc_command_output_${type}
-                COMMAND ${EXECUTABLE} --proto_path=${${prefix}_SOURCE_DIR} --${type}_out=${${prefix}_DESTINATION_DIR} ${proto_sources}
+        add_custom_command(OUTPUT from_proto_to_${type}
+                COMMAND ${EXECUTABLE} --proto_path=${${prefix}_SOURCE_DIR} --${type}_out=${${prefix}_DESTINATION_DIR} ${sources}
                 DEPENDS ${sources})
-        list(APPEND protoc_commands ${protoc_command_output_${type}})
+        message(DEBUG "from_proto_to_${type}: ${EXECUTABLE} -I${${prefix}_SOURCE_DIR} --${type}_out=${${prefix}_DESTINATION_DIR} ${sources}")
+
+        list(APPEND protoc_commands from_proto_to_${type})
     endforeach ()
 
-    add_custom_target(${TARGET} DEPENDS ${protoc_commands})
+    message(DEBUG "protoc_commands: ${protoc_commands}")
+    add_custom_target(${TARGET} ALL DEPENDS ${protoc_commands})
 endfunction()
