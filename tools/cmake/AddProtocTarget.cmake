@@ -2,17 +2,17 @@
 ## author: duruyao@gmail.com
 ## desc:   add a target to compile protobuf sources to some specific language sources
 
-# add_protoc_target(<name> <protobuf-executable>
+# add_protoc_target(<target-name> <protobuf-executable>
 #         SOURCE_DIR <source-directory>
 #         DESTINATION_DIR <destination-directory>
-#         OUTPUT_TYPES {cpp|csharp|dart|go|java|kotlin|objc|php|pyi|python|ruby}...
+#         OUTPUT_TYPES {cpp|csharp|java|kotlin|objc|php|pyi|python|ruby}...
 #         )
 function(ADD_PROTOC_TARGET TARGET EXECUTABLE)
     set(prefix ADD_PROTOC_TARGET)
     set(options)
     set(oneValueKeywords SOURCE_DIR DESTINATION_DIR)
     set(multiValueKeywords OUTPUT_TYPES)
-    set(valid_output_types cpp csharp dart go java kotlin objc php pyi python ruby)
+    set(valid_output_types cpp csharp java kotlin objc php pyi python ruby)
 
     cmake_parse_arguments(PARSE_ARGV 2 "${prefix}" "${options}" "${oneValueKeywords}" "${multiValueKeywords}")
     message(DEBUG "${prefix}_TARGET: ${TARGET}")
