@@ -9,12 +9,19 @@
 #         [REQUIRED_PACKAGES <python-package>...]
 #         )
 function(CHECK_PY_PACKAGES EXECUTABLE)
-    set(prefix ARG)
+    set(prefix CHECK_PY_PACKAGES)
     set(options)
     set(oneValueKeywords)
     set(multiValueKeywords PACKAGES REQUIRED_PACKAGES)
 
     cmake_parse_arguments(PARSE_ARGV 1 "${prefix}" "${options}" "${oneValueKeywords}" "${multiValueKeywords}")
+    message(DEBUG "${prefix}_EXECUTABLE: ${EXECUTABLE}")
+    message(DEBUG "${prefix}_PACKAGES: ${${prefix}_PACKAGES}")
+    message(DEBUG "${prefix}_REQUIRED_PACKAGES: ${${prefix}_REQUIRED_PACKAGES}")
+
+    if (${ARGC} LESS 1)
+        message(FATAL_ERROR "check_py_packages called with incorrect number of arguments")
+    endif ()
 
     foreach (PyPackage IN LISTS ${prefix}_PACKAGES ${prefix}_REQUIRED_PACKAGES)
         string(TOLOWER ${PyPackage} pypackage)
