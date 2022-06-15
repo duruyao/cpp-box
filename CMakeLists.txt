@@ -12,12 +12,6 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-## append CMAKE_MODULE_PATH
-list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/tools/cmake)
-
-## find sdk home
-find_package(SDK REQUIRED)
-
 include(CheckFunctionExists)
 include(CheckLibraryExists)
 include(CheckIncludeFiles)
@@ -27,4 +21,21 @@ include(CheckStructHasMember)
 include(CMakeDependentOption)
 include(FindPkgConfig)
 
-add_subdirectory(src)
+## append CMAKE_MODULE_PATH
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/tools/cmake)
+
+find_package(PythonInterp 3 EXACT REQUIRED)
+find_package(PythonLibs ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR} EXACT)
+
+include(CheckPyPackages)
+check_py_packages(${PYTHON_EXECUTABLE}
+        PACKAGES Conda Panda
+        REQUIRED_PACKAGES Numpy)
+
+include(AddProtocTarget)
+add_protoc_target(proto2all protoc
+        SOURCE_DIR ${CMAKE_SOURCE_DIR}/src/proto
+        DESTINATION_DIR ${CMAKE_SOURCE_DIR}/src/proto
+        OUTPUT_TYPES cpp go java python)
+
+#add_subdirectory(src)

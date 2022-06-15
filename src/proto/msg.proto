@@ -4,6 +4,7 @@ option java_multiple_files = true;
 option java_package = "io.grpc.examples.routeguide";
 option java_outer_classname = "RouteGuideProto";
 option objc_class_prefix = "RTG";
+option go_package = "github.com/protocolbuffers/protobuf/examples/go/tutorialpb";
 
 package routeguide;
 
