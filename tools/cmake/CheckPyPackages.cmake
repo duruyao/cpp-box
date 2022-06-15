@@ -14,9 +14,9 @@ function(CHECK_PY_PACKAGES EXECUTABLE)
     set(multiValueKeywords PACKAGES REQUIRED_PACKAGES)
 
     cmake_parse_arguments(PARSE_ARGV 1 "${prefix}" "${options}" "${oneValueKeywords}" "${multiValueKeywords}")
-    message(DEBUG "${prefix}_EXECUTABLE: ${EXECUTABLE}")
-    message(DEBUG "${prefix}_PACKAGES: ${${prefix}_PACKAGES}")
-    message(DEBUG "${prefix}_REQUIRED_PACKAGES: ${${prefix}_REQUIRED_PACKAGES}")
+    message(DEBUG "[DEBUG] ${prefix}_EXECUTABLE: ${EXECUTABLE}")
+    message(DEBUG "[DEBUG] ${prefix}_PACKAGES: ${${prefix}_PACKAGES}")
+    message(DEBUG "[DEBUG] ${prefix}_REQUIRED_PACKAGES: ${${prefix}_REQUIRED_PACKAGES}")
 
     if (${ARGC} LESS 1)
         message(FATAL_ERROR "check_py_packages called with incorrect number of arguments")

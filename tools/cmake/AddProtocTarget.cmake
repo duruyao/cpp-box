@@ -8,7 +8,7 @@
 #         SOURCE_DIR <source-directory>
 #         DESTINATION_DIR <destination-directory>
 #         OUTPUT_TYPES <cpp|csharp|dart|go|java|kotlin|objc|php|pyi|python|ruby>...)
-function(ADD_PROTOC_TARGET TARGET EXECUTABLE)
+function(ADD_PROTOC_TARGET NAME EXECUTABLE)
     set(prefix ADD_PROTOC_TARGET)
     set(options)
     set(oneValueKeywords SOURCE_DIR DESTINATION_DIR)
@@ -17,11 +17,11 @@ function(ADD_PROTOC_TARGET TARGET EXECUTABLE)
 
     cmake_parse_arguments(PARSE_ARGV 2 "${prefix}" "${options}"
             "${oneValueKeywords}" "${multiValueKeywords}")
-    message(DEBUG "${prefix}_TARGET: ${TARGET}")
-    message(DEBUG "${prefix}_EXECUTABLE: ${EXECUTABLE}")
-    message(DEBUG "${prefix}_SOURCE_DIR: ${${prefix}_SOURCE_DIR}")
-    message(DEBUG "${prefix}_DESTINATION_DIR: ${${prefix}_DESTINATION_DIR}")
-    message(DEBUG "${prefix}_OUTPUT_TYPES: ${${prefix}_OUTPUT_TYPES}")
+    message(DEBUG "[DEBUG] ${prefix}_TARGET: ${NAME}")
+    message(DEBUG "[DEBUG] ${prefix}_EXECUTABLE: ${EXECUTABLE}")
+    message(DEBUG "[DEBUG] ${prefix}_SOURCE_DIR: ${${prefix}_SOURCE_DIR}")
+    message(DEBUG "[DEBUG] ${prefix}_DESTINATION_DIR: ${${prefix}_DESTINATION_DIR}")
+    message(DEBUG "[DEBUG] ${prefix}_OUTPUT_TYPES: ${${prefix}_OUTPUT_TYPES}")
 
     if (${ARGC} LESS 8)
         message(FATAL_ERROR "add_protoc_target called with incorrect number of arguments")
@@ -42,11 +42,11 @@ function(ADD_PROTOC_TARGET TARGET EXECUTABLE)
                 COMMAND ${EXECUTABLE}
                 ARGS --proto_path=${${prefix}_SOURCE_DIR} --${type}_out=${${prefix}_DESTINATION_DIR} ${sources}
                 DEPENDS ${sources})
-        message(DEBUG "from_proto_to_${type}: ${EXECUTABLE} --proto_path=${${prefix}_SOURCE_DIR} --${type}_out=${${prefix}_DESTINATION_DIR} ${sources}")
+        message(DEBUG "[DEBUG] from_proto_to_${type}: ${EXECUTABLE} --proto_path=${${prefix}_SOURCE_DIR} --${type}_out=${${prefix}_DESTINATION_DIR} ${sources}")
 
         list(APPEND protoc_commands from_proto_to_${type})
     endforeach ()
 
-    message(DEBUG "protoc_commands: ${protoc_commands}")
-    add_custom_target(${TARGET} ALL DEPENDS ${protoc_commands})
+    message(DEBUG "[DEBUG] protoc_commands: ${protoc_commands}")
+    add_custom_target(${NAME} ALL DEPENDS ${protoc_commands})
 endfunction()
