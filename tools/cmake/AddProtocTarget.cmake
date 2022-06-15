@@ -42,8 +42,7 @@ function(ADD_PROTOC_TARGET TARGET EXECUTABLE)
                 COMMAND ${EXECUTABLE}
                 ARGS --proto_path=${${prefix}_SOURCE_DIR} --${type}_out=${${prefix}_DESTINATION_DIR} ${sources}
                 DEPENDS ${sources})
-        message(DEBUG "from_proto_to_${type}: ${EXECUTABLE}
-        --proto_path=${${prefix}_SOURCE_DIR} --${type}_out=${${prefix}_DESTINATION_DIR} ${sources}")
+        message(DEBUG "from_proto_to_${type}: ${EXECUTABLE} --proto_path=${${prefix}_SOURCE_DIR} --${type}_out=${${prefix}_DESTINATION_DIR} ${sources}")
 
         list(APPEND protoc_commands from_proto_to_${type})
     endforeach ()
