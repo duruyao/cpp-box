@@ -15,6 +15,7 @@ project(${project}
         VERSION 1.0.0
         LANGUAGES C CXX)
 
+# general set up
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_EXTENSIONS OFF)
 set(CMAKE_C_STANDARD_REQUIRED ON)
@@ -29,27 +30,82 @@ if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
 endif ()
 
+# print debug messages of variables
+#
+# debug_vars([variable]...)
+function(DEBUG_VARS)
+    foreach (var IN ITEMS ${ARGV})
+        message(DEBUG "[DEBUG] ${var}: ${${var}}")
+    endforeach ()
+endfunction()
+
+# find sources and header files
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR} sources)
-message(DEBUG "[DEBUG] ${project} sources: ${sources}")
+debug_vars(sources)
 
+set(PUBLIC_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include CACHE PATH "Public include directories")
+set(PRIVATE_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR} CACHE PATH "Private include directories")
+debug_vars(PUBLIC_INCLUDE_DIR PRIVATE_INCLUDE_DIR)
+
+file(GLOB public_headers ${PUBLIC_INCLUDE_DIR}/*.h ${PUBLIC_INCLUDE_DIR}/*.hpp)
+debug_vars(public_headers)
+
+# add target shared libraries
 if (NOT BUILD_ONLY_STATIC_LIBS)
-    add_library(${project}-shared SHARED
-            ${sources})
+    add_library(${project}-shared SHARED)
+    target_sources(${project}-shared
+            PRIVATE ${sources})
     target_include_directories(${project}-shared
-            PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/include)
+            PUBLIC ${PUBLIC_INCLUDE_DIR}
+            PRIVATE ${PRIVATE_INCLUDE_DIR})
     set_target_properties(${project}-shared
-            PROPERTIES OUTPUT_NAME ${project}
+            PROPERTIES
+            OUTPUT_NAME ${project}
+            PUBLIC_HEADER "${public_headers}"
+            POSITION_INDEPENDENT_CODE 1
+            MACOSX_RPATH ON
+            WINDOWS_EXPORT_ALL_SYMBOLS ON
             SOVERSION ${PROJECT_VERSION_MAJOR}
             VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
 endif ()
 
+# add target static libraries
 if (NOT BUILD_ONLY_SHARED_LIBS)
-    add_library(${project}-static STATIC
-            ${sources})
+    add_library(${project}-static STATIC)
+    target_sources(${project}-static
+            PRIVATE ${sources})
     target_include_directories(${project}-static
-            PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/include)
+            PUBLIC ${PUBLIC_INCLUDE_DIR}
+            PRIVATE ${PRIVATE_INCLUDE_DIR})
     set_target_properties(${project}-static
-            PROPERTIES OUTPUT_NAME ${project}
+            PROPERTIES
+            OUTPUT_NAME ${project}
+            PUBLIC_HEADER "${public_headers}"
+            POSITION_INDEPENDENT_CODE 1
+            MACOSX_RPATH ON
+            WINDOWS_EXPORT_ALL_SYMBOLS ON
             SOVERSION ${PROJECT_VERSION_MAJOR}
             VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
 endif ()
+
+# configure install
+include(GNUInstallDirs)
+
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_BINDIR})
+
+set(INSTALL_LIBDIR ${CMAKE_INSTALL_LIBDIR} CACHE PATH "Installation directory for libraries")
+set(INSTALL_BINDIR ${CMAKE_INSTALL_BINDIR} CACHE PATH "Installation directory for executables")
+set(INSTALL_INCLUDEDIR ${CMAKE_INSTALL_INCLUDEDIR} CACHE PATH "Installation directory for header files")
+if (WIN32 AND NOT CYGWIN)
+    set(INSTALL_CMAKEDIR CMake CACHE PATH "Installation directory for CMake files")
+else ()
+    set(INSTALL_CMAKEDIR share/cmake/${PROJECT_NAME} CACHE PATH "Installation directory for CMake files")
+endif ()
+
+foreach (item IN ITEMS LIB BIN INCLUDE CMAKE)
+    file(TO_NATIVE_PATH ${CMAKE_INSTALL_PREFIX}/${INSTALL_${item}DIR} path)
+    message(STATUS "Installing ${item} components to ${path}")
+    unset(path)
+endforeach ()
