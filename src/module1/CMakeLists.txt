@@ -41,6 +41,7 @@ endfunction()
 
 # find sources and header files
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR} sources)
+aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src sources)
 debug_vars(sources)
 
 set(PUBLIC_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include CACHE PATH "Public include directories")
@@ -50,45 +51,7 @@ debug_vars(PUBLIC_INCLUDE_DIR PRIVATE_INCLUDE_DIR)
 file(GLOB public_headers ${PUBLIC_INCLUDE_DIR}/*.h ${PUBLIC_INCLUDE_DIR}/*.hpp)
 debug_vars(public_headers)
 
-# add target shared libraries
-if (NOT BUILD_ONLY_STATIC_LIBS)
-    add_library(${project}-shared SHARED)
-    target_sources(${project}-shared
-            PRIVATE ${sources})
-    target_include_directories(${project}-shared
-            PUBLIC ${PUBLIC_INCLUDE_DIR}
-            PRIVATE ${PRIVATE_INCLUDE_DIR})
-    set_target_properties(${project}-shared
-            PROPERTIES
-            OUTPUT_NAME ${project}
-            PUBLIC_HEADER "${public_headers}"
-            POSITION_INDEPENDENT_CODE 1
-            MACOSX_RPATH ON
-            WINDOWS_EXPORT_ALL_SYMBOLS ON
-            SOVERSION ${PROJECT_VERSION_MAJOR}
-            VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
-endif ()
-
-# add target static libraries
-if (NOT BUILD_ONLY_SHARED_LIBS)
-    add_library(${project}-static STATIC)
-    target_sources(${project}-static
-            PRIVATE ${sources})
-    target_include_directories(${project}-static
-            PUBLIC ${PUBLIC_INCLUDE_DIR}
-            PRIVATE ${PRIVATE_INCLUDE_DIR})
-    set_target_properties(${project}-static
-            PROPERTIES
-            OUTPUT_NAME ${project}
-            PUBLIC_HEADER "${public_headers}"
-            POSITION_INDEPENDENT_CODE 1
-            MACOSX_RPATH ON
-            WINDOWS_EXPORT_ALL_SYMBOLS ON
-            SOVERSION ${PROJECT_VERSION_MAJOR}
-            VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH})
-endif ()
-
-# configure install
+# set up installing directories
 include(GNUInstallDirs)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR})
@@ -106,6 +69,78 @@ endif ()
 
 foreach (item IN ITEMS LIB BIN INCLUDE CMAKE)
     file(TO_NATIVE_PATH ${CMAKE_INSTALL_PREFIX}/${INSTALL_${item}DIR} path)
-    message(STATUS "Installing ${item} components to ${path}")
+    message(STATUS "Installing ${project} ${item} components to ${path}")
     unset(path)
 endforeach ()
+
+# set up RPATH (Run-time Search Path)
+file(RELATIVE_PATH relative_path ${CMAKE_INSTALL_PREFIX}/${INSTALL_BINDIR} ${CMAKE_INSTALL_PREFIX})
+if (APPLE)
+    set(rpath "@loader_path/${relative_path}")
+else ()
+    set(rpath "\$ORIGIN/${relative_path}")
+endif ()
+file(TO_NATIVE_PATH "${rpath}/${INSTALL_LIBDIR}" install_rpath)
+
+# add target shared libraries
+if (NOT BUILD_ONLY_STATIC_LIBS)
+    add_library(${project}-shared SHARED)
+    target_sources(${project}-shared
+            PRIVATE ${sources})
+    target_include_directories(${project}-shared
+            PUBLIC ${PUBLIC_INCLUDE_DIR}
+            PRIVATE ${PRIVATE_INCLUDE_DIR})
+    set_target_properties(${project}-shared
+            PROPERTIES
+            OUTPUT_NAME ${project}
+            PUBLIC_HEADER "${public_headers}"
+            SOVERSION ${PROJECT_VERSION_MAJOR}
+            VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}
+            POSITION_INDEPENDENT_CODE 1
+            MACOSX_RPATH ON
+            SKIP_BUILD_RPATH OFF
+            BUILD_WITH_INSTALL_RPATH OFF
+            INSTALL_RPATH "${install_rpath}"
+            INSTALL_RPATH_USE_LINK_PATH ON
+            WINDOWS_EXPORT_ALL_SYMBOLS ON)
+    list(APPEND targets ${project}-shared)
+endif ()
+
+# add target static libraries
+if (NOT BUILD_ONLY_SHARED_LIBS)
+    add_library(${project}-static STATIC)
+    target_sources(${project}-static
+            PRIVATE ${sources})
+    target_include_directories(${project}-static
+            PUBLIC ${PUBLIC_INCLUDE_DIR}
+            PRIVATE ${PRIVATE_INCLUDE_DIR})
+    set_target_properties(${project}-static
+            PROPERTIES
+            OUTPUT_NAME ${project}
+            PUBLIC_HEADER "${public_headers}"
+            SOVERSION ${PROJECT_VERSION_MAJOR}
+            VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}
+            POSITION_INDEPENDENT_CODE 1
+            MACOSX_RPATH ON
+            SKIP_BUILD_RPATH OFF
+            BUILD_WITH_INSTALL_RPATH OFF
+            INSTALL_RPATH "${install_rpath}"
+            INSTALL_RPATH_USE_LINK_PATH ON
+            WINDOWS_EXPORT_ALL_SYMBOLS ON)
+    list(APPEND targets ${project}-static)
+endif ()
+
+# install libs, header files
+install(TARGETS ${targets}
+        ARCHIVE
+        DESTINATION ${INSTALL_LIBDIR}
+        COMPONENT lib
+        RUNTIME
+        DESTINATION ${INSTALL_BINDIR}
+        COMPONENT bin
+        LIBRARY
+        DESTINATION ${INSTALL_LIBDIR}
+        COMPONENT lib
+        PUBLIC_HEADER
+        DESTINATION ${INSTALL_INCLUDEDIR}/${project}
+        COMPONENT dev)
