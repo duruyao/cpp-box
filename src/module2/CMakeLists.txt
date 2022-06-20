@@ -67,7 +67,7 @@ else ()
     set(INSTALL_CMAKEDIR share/cmake/${PROJECT_NAME} CACHE PATH "Installation directory for CMake files")
 endif ()
 
-foreach (item IN ITEMS LIB BIN INCLUDE CMAKE)
+foreach (item IN ITEMS LIB INCLUDE CMAKE)
     file(TO_NATIVE_PATH ${CMAKE_INSTALL_PREFIX}/${INSTALL_${item}DIR} path)
     message(STATUS "Installing ${project} ${item} components to ${path}")
     unset(path)
@@ -130,7 +130,7 @@ if (NOT BUILD_ONLY_SHARED_LIBS)
     list(APPEND targets ${project}-static)
 endif ()
 
-# install libs, header files
+# install bin, libs, header files
 install(TARGETS ${targets}
         ARCHIVE
         DESTINATION ${INSTALL_LIBDIR}
@@ -143,4 +143,4 @@ install(TARGETS ${targets}
         COMPONENT lib
         PUBLIC_HEADER
         DESTINATION ${INSTALL_INCLUDEDIR}/${project}
-        COMPONENT dev)
+        COMPONENT include)
